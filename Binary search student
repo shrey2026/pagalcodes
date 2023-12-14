@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct Student {
+    int rollNo;
+    char name[50];
+    float percentage;
+};
+
+// Function to perform binary search on the student database based on roll number
+int binarySearch(struct Student students[], int low, int high, int targetRollNo) {
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+
+        if (students[mid].rollNo == targetRollNo) {
+            return mid; // Student found at index mid
+        } else if (students[mid].rollNo < targetRollNo) {
+            low = mid + 1; // Search in the right half
+        } else {
+            high = mid - 1; // Search in the left half
+        }
+    }
+
+    return -1; // Student not found
+}
+
+int main() {
+    int numStudents;
+
+    printf("Enter the number of students: ");
+    scanf("%d", &numStudents);
+
+    // Allocate memory for the student database
+    struct Student* students = (struct Student*)malloc(numStudents * sizeof(struct Student));
+
+    // Input student details
+    for (int i = 0; i < numStudents; ++i) {
+        printf("Enter details for student %d:\n", i + 1);
+        printf("Roll No: ");
+        scanf("%d", &students[i].rollNo);
+        printf("Name: ");
+        scanf("%s", students[i].name);
+        printf("Percentage: ");
+        scanf("%f", &students[i].percentage);
+    }
+
+    // Sort the student database based on roll number for binary search
+    for (int i = 0; i < numStudents - 1; ++i) {
+        for (int j = 0; j < numStudents - i - 1; ++j) {
+            if (students[j].rollNo > students[j + 1].rollNo) {
+                // Swap the students
+                struct Student temp = students[j];
+                students[j] = students[j + 1];
+                students[j + 1] = temp;
+            }
+        }
+    }
+
+    int targetRollNo;
+    printf("\nEnter the Roll No to search: ");
+    scanf("%d", &targetRollNo);
+
+    // Perform binary search to find the student
+    int resultIndex = binarySearch(students, 0, numStudents - 1, targetRollNo);
+
+    // Display the result
+    if (resultIndex != -1) {
+        printf("\nStudent Found!\n");
+        printf("Roll No: %d\n", students[resultIndex].rollNo);
+        printf("Name: %s\n", students[resultIndex].name);
+        printf("Percentage: %.2f\n", students[resultIndex].percentage);
+    } else {
+        printf("\nStudent not found in the database.\n");
+    }
+
+    // Free allocated memory
+    free(students);
+
+    return 0;
+}
