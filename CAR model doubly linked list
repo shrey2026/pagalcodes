@@ -1,0 +1,218 @@
+#include <stdio.h>
+#include <stdlib.h>
+struct car
+{
+  char model[20];
+  int price;
+  char manufacturer[20];
+  int engine_capacity;
+  struct car *next;
+  struct car *prev;
+};
+typedef struct car car;
+
+car *create_list(car *head)
+{
+  car *new_node;
+  new_node = (car *)malloc(sizeof(car));
+  printf("Enter the model name: \n");
+  scanf("%s", new_node->model);
+  printf("Enter the price: \n");
+  scanf("%d", &new_node->price);
+  printf("Enter the manufacturer: \n");
+  scanf("%s", new_node->manufacturer);
+  printf("Enter the engine capacity: \n");
+  scanf("%d", &new_node->engine_capacity);
+  new_node->next = NULL;
+  new_node->prev = NULL;
+  head = new_node;
+  return head;
+}
+
+car *insert_node_end(car *head)
+{
+  car *new_node;
+  new_node = (car *)malloc(sizeof(car));
+  car *temp;
+  temp = head;
+  printf("Enter the model name: \n");
+  scanf("%s", new_node->model);
+  printf("Enter the price: \n");
+  scanf("%d", &new_node->price);
+  printf("Enter the manufacturer: \n");
+  scanf("%s", new_node->manufacturer);
+  printf("Enter the engine capacity: \n");
+  scanf("%d", &new_node->engine_capacity);
+  while (temp->next != NULL)
+  {
+    temp = temp->next;
+  }
+  temp->next = new_node;
+  new_node->prev = temp;
+  new_node->next = NULL;
+  return head;
+}
+car *delete_node(car *head)
+{
+  car *temp;
+  temp = head;
+  char model_name[20];
+  printf("Enter the model name to be deleted: \n");
+  scanf("%s", model_name);
+  while (temp != NULL)
+  {
+    if (strcmp(temp->model, model_name) == 0)
+    {
+      if (temp == head)
+      {
+        head = temp->next;
+        free(temp);
+        return head;
+      }
+      else
+      {
+        temp->prev->next = temp->next;
+        if (temp->next != NULL)
+        {
+          temp->next->prev = temp->prev;
+        }
+        free(temp);
+        return head;
+      }
+    }
+    temp = temp->next;
+  }
+  printf("Model name not found! \n");
+  return head;
+}
+
+car *update_data(car *head)
+{
+  car *temp;
+  temp = head;
+  char model_name[20];
+  printf("Enter the model name to be updated: \n");
+  scanf("%s", model_name);
+  while (temp != NULL)
+  {
+    if (strcmp(temp->model, model_name) == 0)
+    {
+      printf("Enter the price: \n");
+      scanf("%d", &temp->price);
+      printf("Enter the manufacturer: \n");
+      scanf("%s", temp->manufacturer);
+      printf("Enter the engine capacity: \n");
+      scanf("%d", &temp->engine_capacity);
+      return head;
+    }
+    temp = temp->next;
+  }
+  printf("Model name not found! \n");
+  return head;
+}
+
+void list_models_price_range(car *head, int lower_limit, int upper_limit)
+{
+  car *temp;
+  temp = head;
+  printf("Car models within the given price range are: \n");
+  while (temp != NULL)
+  {
+    if (temp->price >= lower_limit && temp->price <= upper_limit)
+      printf("%s\n", temp->model);
+    temp = temp->next;
+  }
+}
+
+void list_details_model(car *head, char model_name[20])
+{
+  car *temp;
+  temp = head;
+  while (temp != NULL)
+  {
+    if (strcmp(temp->model, model_name) == 0)
+    {
+      printf("Model name: %s\n", temp->model);
+      printf("Price: %d\n", temp->price);
+      printf("Manufacturer: %s\n", temp->manufacturer);
+      printf("Engine capacity: %d\n", temp->engine_capacity);
+      return;
+    }
+    temp = temp->next;
+  }
+  printf("Model name not found! \n");
+}
+
+void list_all_details(car *head)
+{
+  car *temp;
+  temp = head;
+  printf("All car details are: \n");
+  while (temp != NULL)
+  {
+    printf("Model name: %s\n", temp->model);
+    printf("Price: %d\n", temp->price);
+    printf("Manufacturer: %s\n", temp->manufacturer);
+    printf("Engine capacity: %d\n", temp->engine_capacity);
+    printf("\n");
+    temp = temp->next;
+  }
+}
+
+int main()
+{
+  int choice;
+  int lower_limit, upper_limit;
+  char model_name[20];
+  car *head = NULL;
+  while (1)
+  {
+    printf("\n");
+    printf("1. Create list\n");
+    printf("2. Insert node at the end\n");
+    printf("3. Delete node\n");
+    printf("4. Update data\n");
+    printf("5. List all models within a given price range\n");
+    printf("6. List all details of a given model\n");
+    printf("7. List all details\n");
+    printf("8. Exit\n");
+    printf("Enter your choice: \n");
+    scanf("%d", &choice);
+    switch (choice)
+    {
+    case 1:
+      head = create_list(head);
+      break;
+    case 2:
+      head = insert_node_end(head);
+      break;
+    case 3:
+      head = delete_node(head);
+      break;
+    case 4:
+      head = update_data(head);
+      break;
+    case 5:
+      printf("Enter the lower limit: \n");
+      scanf("%d", &lower_limit);
+      printf("Enter the upper limit: \n");
+      scanf("%d", &upper_limit);
+      list_models_price_range(head, lower_limit, upper_limit);
+      break;
+    case 6:
+      printf("Enter the model name: \n");
+      scanf("%s", model_name);
+      list_details_model(head, model_name);
+      break;
+    case 7:
+      list_all_details(head);
+      break;
+    case 8:
+      exit(0);
+      break;
+    default:
+      printf("Invalid Choice! \n");
+    }
+  }
+  return 0;
+}
