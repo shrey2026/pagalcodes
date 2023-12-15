@@ -1,94 +1,113 @@
-#include <stdio.h>
+#include<stdio.h>
 
 #define MAX 100
 
-// Structure to represent a sparse matrix element
-struct Element {
-    int row;
-    int col;
-    int value;
-};
-
-// Structure to represent a sparse matrix
-struct SparseMatrix {
-    int rows;
-    int cols;
-    int numElements;
-    struct Element data[MAX];
-};
-
-// Function to input a sparse matrix
-void inputMatrix(struct SparseMatrix *matrix) {
-    printf("Enter number of rows and columns: ");
-    scanf("%d %d", &matrix->rows, &matrix->cols);
-
-    printf("Enter number of non-zero elements: ");
-    scanf("%d", &matrix->numElements);
-
-    printf("Enter non-zero elements (row, column, value):\n");
-    for (int i = 0; i < matrix->numElements; ++i) {
-        scanf("%d %d %d", &matrix->data[i].row, &matrix->data[i].col, &matrix->data[i].value);
+void printMatrix(int matrix[MAX][MAX], int rows, int cols) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("%d\t", matrix[i][j]);
+        }
+        printf("\n");
     }
 }
 
-// Function to print a sparse matrix
-void printMatrix(struct SparseMatrix matrix) {
-    printf("Sparse Matrix:\n");
-    for (int i = 0; i < matrix.numElements; ++i) {
-        printf("%d %d %d\n", matrix.data[i].row, matrix.data[i].col, matrix.data[i].value);
+
+void printSparseMatrix(int sparseMatrix[MAX][3]) {
+    for (int i = 0; i < sparseMatrix[0][2]; i++) {
+        for (int j = 0; j < 3; j++) {
+            printf("%d\t", sparseMatrix[i][j]);
+        }
+        printf("\n");
     }
 }
 
-// Function to perform simple transpose of a sparse matrix
-void simpleTranspose(struct SparseMatrix *matrix) {
-    for (int i = 0; i < matrix->numElements; ++i) {
-        int temp = matrix->data[i].row;
-        matrix->data[i].row = matrix->data[i].col;
-        matrix->data[i].col = temp;
-    }
-}
+void sparseMatrixRepresentation(int matrix[MAX][MAX], int rows, int cols, int sparseMatrix[MAX][3]) {
+    int k = 1;
+    sparseMatrix[0][0] = rows;
+    sparseMatrix[0][1] = cols;
 
-// Function to perform fast transpose of a sparse matrix
-void fastTranspose(struct SparseMatrix *matrix) {
-    // Swap rows and columns
-    int temp = matrix->rows;
-    matrix->rows = matrix->cols;
-    matrix->cols = temp;
-
-    // Sort elements based on column
-    for (int i = 0; i < matrix->numElements - 1; ++i) {
-        for (int j = i + 1; j < matrix->numElements; ++j) {
-            if (matrix->data[i].col > matrix->data[j].col) {
-                // Swap elements
-                struct Element tempElement = matrix->data[i];
-                matrix->data[i] = matrix->data[j];
-                matrix->data[j] = tempElement;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (matrix[i][j] != 0) {
+                sparseMatrix[k][0] = i;
+                sparseMatrix[k][1] = j;
+                sparseMatrix[k][2] = matrix[i][j];
+                k++;
             }
         }
     }
+
+    sparseMatrix[0][2] = k - 1;
+}
+
+void simpleTranspose(int sparseMatrix[MAX][3], int transposedMatrix[MAX][3]) {
+    for (int i = 0; i <= sparseMatrix[0][2]; i++) {
+        transposedMatrix[i][0] = sparseMatrix[i][1];
+        transposedMatrix[i][1] = sparseMatrix[i][0];
+        transposedMatrix[i][2] = sparseMatrix[i][2];
+    }
+}
+
+void fastTranspose(int sparseMatrix[MAX][3], int transposedMatrix[MAX][3]) {
+    int rowTerms[MAX], startingPos[MAX];
+    int i, j;
+
+    for (i = 0; i < sparseMatrix[0][2]; i++) {
+        rowTerms[i] = 0;
+    }
+
+    for (i = 1; i <= sparseMatrix[0][2]; i++) {
+        rowTerms[sparseMatrix[i][1]]++;
+    }
+
+    startingPos[0] = 1;
+
+    for (i = 1; i < sparseMatrix[0][2]; i++) {
+        startingPos[i] = startingPos[i - 1] + rowTerms[i - 1];
+    }
+
+    for (i = 1; i <= sparseMatrix[0][2]; i++) {
+        j = startingPos[sparseMatrix[i][1]];
+        transposedMatrix[j][0] = sparseMatrix[i][1];
+        transposedMatrix[j][1] = sparseMatrix[i][0];
+        transposedMatrix[j][2] = sparseMatrix[i][2];
+        startingPos[sparseMatrix[i][1]]++;
+    }
+
+    transposedMatrix[0][0] = sparseMatrix[0][1];
+    transposedMatrix[0][1] = sparseMatrix[0][0];
+    transposedMatrix[0][2] = sparseMatrix[0][2];
 }
 
 int main() {
-    struct SparseMatrix matrix;
+    int matrix[MAX][MAX] = {
+        {0, 0, 3, 0, 4},
+        {0, 0, 5, 7, 0},
+        {0, 0, 0, 0, 0},
+        {0, 2, 6, 0, 0}
+    };
 
-    // Input sparse matrix
-    inputMatrix(&matrix);
+    int rows = 4;
+    int cols = 5;
 
-    // Print original matrix
-    printMatrix(matrix);
+    int sparseMatrix[MAX][3];
+    int simpleTransposedMatrix[MAX][3];
+    int fastTransposedMatrix[MAX][3];
 
-    // Perform simple transpose
-    simpleTranspose(&matrix);
+    printf("Original Matrix:\n");
+    printMatrix(matrix, rows, cols);
+
+    sparseMatrixRepresentation(matrix, rows, cols, sparseMatrix);
+    printf("\nSparse Matrix Representation:\n");
+    printSparseMatrix(sparseMatrix);
+
+    simpleTranspose(sparseMatrix, simpleTransposedMatrix);
     printf("\nSimple Transposed Matrix:\n");
-    printMatrix(matrix);
+    printSparseMatrix(simpleTransposedMatrix);
 
-    // Reset matrix for fast transpose
-    inputMatrix(&matrix);
-
-    // Perform fast transpose
-    fastTranspose(&matrix);
+    fastTranspose(sparseMatrix, fastTransposedMatrix);
     printf("\nFast Transposed Matrix:\n");
-    printMatrix(matrix);
+    printSparseMatrix(fastTransposedMatrix);
 
     return 0;
 }
